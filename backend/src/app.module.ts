@@ -10,6 +10,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { UsersModule } from './modules/users/users.module';
 import { EventsModule } from './modules/events/events.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { DealsModule } from './modules/deals/deals.module';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor } from './common/interceptors';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -47,6 +50,9 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
     WorkspacesModule,
     UsersModule,
     EventsModule,
+    ContactsModule,
+    LeadsModule,
+    DealsModule,
   ],
   controllers: [AppController],
   providers: [

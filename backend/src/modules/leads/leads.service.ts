@@ -28,7 +28,7 @@ export class LeadsService {
   }
 
   async findAll(workspaceId: string, filter?: LeadFilterDto) {
-    const where: any = { workspaceId };
+    const where: any = { workspaceId, deletedAt: null };
 
     if (filter?.search) {
       where.OR = [
@@ -63,7 +63,7 @@ export class LeadsService {
 
   async findOne(id: string, workspaceId: string) {
     const lead = await this.prisma.lead.findFirst({
-      where: { id, workspaceId },
+      where: { id, workspaceId, deletedAt: null },
       include: {
         owner: {
           select: {
@@ -115,11 +115,11 @@ export class LeadsService {
   }
 
   async getCount(workspaceId: string): Promise<number> {
-    return this.prisma.lead.count({ where: { workspaceId } });
+    return this.prisma.lead.count({ where: { workspaceId, deletedAt: null } });
   }
 
   async getStatistics(workspaceId: string) {
-    const total = await this.prisma.lead.count({ where: { workspaceId } });
+    const total = await this.prisma.lead.count({ where: { workspaceId, deletedAt: null } });
 
     return { total };
   }

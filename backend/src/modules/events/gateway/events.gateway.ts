@@ -9,11 +9,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+  cors: true, // Overridden in afterInit
 })
 export class EventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
@@ -24,10 +23,27 @@ export class EventsGateway
   private logger: Logger = new Logger('EventsGateway');
   private connectedUsers: Map<string, string> = new Map();
 
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
 
-  afterInit(_server: Server) {
-    this.logger.log('WebSocket Gateway initialized');
+  afterInit(server: Server) {
+    // Configure CORS using ConfigService instead of process.env
+    const corsOrigin = this.configService.get<string>('CORS_ORIGIN') || 'http://localhost:3000';
+    const origins = corsOrigin.split(',').map((o) => o.trim());
+
+    server.engine.on('initial_headers', () => {});
+    // Apply CORS settings to the socket.io server
+    (server as any).opts = {
+      ...(server as any).opts,
+      cors: {
+        origin: origins,
+        credentials: true,
+      },
+    };
+
+    this.logger.log(`WebSocket Gateway initialized with CORS origins: ${origins.join(', ')}`);
   }
 
   async handleConnection(client: Socket) {

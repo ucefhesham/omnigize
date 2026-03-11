@@ -30,7 +30,7 @@ export class DealsService {
   }
 
   async findAll(workspaceId: string, filter?: DealFilterDto) {
-    const where: any = { workspaceId };
+    const where: any = { workspaceId, deletedAt: null };
 
     if (filter?.search) {
       where.OR = [{ title: { contains: filter.search, mode: 'insensitive' } }];
@@ -65,7 +65,7 @@ export class DealsService {
 
   async findOne(id: string, workspaceId: string) {
     const deal = await this.prisma.deal.findFirst({
-      where: { id, workspaceId },
+      where: { id, workspaceId, deletedAt: null },
       include: {
         owner: {
           select: {
@@ -118,12 +118,12 @@ export class DealsService {
   }
 
   async getCount(workspaceId: string): Promise<number> {
-    return this.prisma.deal.count({ where: { workspaceId } });
+    return this.prisma.deal.count({ where: { workspaceId, deletedAt: null } });
   }
 
   async getStatistics(workspaceId: string) {
     const deals = await this.prisma.deal.findMany({
-      where: { workspaceId },
+      where: { workspaceId, deletedAt: null },
       select: { value: true },
     });
 

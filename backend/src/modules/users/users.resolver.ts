@@ -6,12 +6,13 @@ import {
   ObjectType,
   Field,
   ID,
+  Int,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto, AssignRoleDto } from './dto/user.dto';
-import { CurrentUser } from '../../common/decorators';
-import { AuthGuard } from '../../common/guards';
+import { CurrentUser, Roles } from '../../common/decorators';
+import { AuthGuard, RolesGuard } from '../../common/guards';
 
 @ObjectType()
 export class UserResponse {
@@ -58,8 +59,12 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Query(() => [UserResponse])
-  async users(@CurrentUser() user: any) {
-    return this.usersService.findAll(user.workspaceId);
+  async users(
+    @CurrentUser() user: any,
+    @Args('page', { type: () => Int, nullable: true, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, nullable: true, defaultValue: 50 }) limit: number,
+  ) {
+    return this.usersService.findAll(user.workspaceId, page, limit);
   }
 
   @UseGuards(AuthGuard)
@@ -81,7 +86,8 @@ export class UsersResolver {
     return this.usersService.update(id, user.workspaceId, updateUserDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Admin')
   @Mutation(() => Boolean)
   async deleteUser(
     @Args('id', { type: () => ID }) id: string,
@@ -91,7 +97,8 @@ export class UsersResolver {
     return true;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Admin')
   @Mutation(() => UserResponse)
   async assignRole(
     @Args('id', { type: () => ID }) id: string,
@@ -101,7 +108,8 @@ export class UsersResolver {
     return this.usersService.assignRole(id, user.workspaceId, assignRoleDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Admin')
   @Mutation(() => UserResponse)
   async removeRole(
     @Args('id', { type: () => ID }) id: string,

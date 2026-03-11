@@ -1,5 +1,6 @@
-import { Resolver, Mutation, Args, ObjectType, Field } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, ObjectType, Field, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators';
@@ -67,18 +68,24 @@ export class AuthResolver {
   constructor(private authService: AuthService) {}
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ short: { limit: 5, ttl: 1000 }, medium: { limit: 10, ttl: 10000 } })
   @Mutation(() => AuthPayload)
   async login(@Args() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ short: { limit: 3, ttl: 1000 }, medium: { limit: 5, ttl: 10000 } })
   @Mutation(() => AuthPayload)
   async register(@Args() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ short: { limit: 5, ttl: 1000 }, medium: { limit: 10, ttl: 10000 } })
   @Mutation(() => RefreshTokenPayload)
   async refreshToken(@Args('token') token: string) {
     return this.authService.refreshToken(token);
@@ -86,7 +93,20 @@ export class AuthResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Boolean)
-  async logout() {
+  async logout(@Context() context: { req: { headers: { authorization?: string } } }) {
+    const authHeader = context.req?.headers?.authorization;
+    if (authHeader) {
+      const token = authHeader.replace('Bearer ', '');
+      await this.authService.logout(token);
+    }
     return true;
+  }
+
+  @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ short: { limit: 5, ttl: 1000 }, medium: { limit: 10, ttl: 10000 } })
+  @Mutation(() => Boolean)
+  async verifyEmail(@Args('token') token: string) {
+    return this.authService.verifyEmail(token);
   }
 }

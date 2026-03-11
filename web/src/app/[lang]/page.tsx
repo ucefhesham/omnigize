@@ -2,6 +2,8 @@ import Image from "next/image";
 import { getDictionary } from "../../get-dictionary";
 import type { Locale } from "../../i18n-config";
 import { siteConfig } from "../../config/site";
+import Link from "next/link";
+import { LanguageSwitcher } from "../../components/language-switcher";
 
 export default async function Home({
   params,
@@ -30,12 +32,13 @@ export default async function Home({
             <a className="text-sm font-medium text-text-muted hover:text-primary-dark transition-colors" href="#">{dict.nav.resources}</a>
           </nav>
           <div className="flex items-center gap-4">
-            <button className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 text-sm font-bold text-text-main transition-colors hover:text-primary-dark">
+            <LanguageSwitcher currentLang={lang} dictionary={dict} />
+            <Link href={`/${lang}/login`} className="hidden sm:flex h-9 items-center justify-center rounded-lg px-4 text-sm font-bold text-text-main transition-colors hover:text-primary-dark">
               {dict.common.signIn}
-            </button>
-            <button className="flex h-9 items-center justify-center rounded-lg bg-text-main px-4 text-sm font-bold text-white transition-all hover:bg-slate-800 shadow-md">
+            </Link>
+            <Link href={`/${lang}/signup`} className="flex h-9 items-center justify-center rounded-lg bg-text-main px-4 text-sm font-bold text-white transition-all hover:bg-slate-800 shadow-md">
               {dict.common.requestDemo}
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -64,12 +67,12 @@ export default async function Home({
               {dict.hero.description}
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button className="flex h-12 min-w-[200px] items-center justify-center rounded-lg bg-primary px-8 text-base font-bold text-slate-900 transition-all hover:bg-primary-hover hover:scale-105 shadow-glow hover:shadow-lg">
+              <Link href={`/${lang}/signup`} className="flex h-12 min-w-[200px] items-center justify-center rounded-lg bg-primary px-8 text-base font-bold text-slate-900 transition-all hover:bg-primary-hover hover:scale-105 shadow-glow hover:shadow-lg">
                 {dict.common.requestEnterpriseDemo}
-              </button>
-              <button className="flex h-12 min-w-[200px] items-center justify-center rounded-lg border border-border-light bg-white px-8 text-base font-medium text-text-main transition-colors hover:border-primary/50 hover:bg-gray-50 shadow-sm">
-                {dict.common.viewDocs}
-              </button>
+              </Link>
+              <Link href={`/${lang}/login`} className="flex h-12 min-w-[200px] items-center justify-center rounded-lg border border-border-light bg-white px-8 text-base font-medium text-text-main transition-colors hover:border-primary/50 hover:bg-gray-50 shadow-sm">
+                {dict.common.signIn}
+              </Link>
             </div>
 
             {/* Mockup UI */}
@@ -146,86 +149,70 @@ export default async function Home({
                 {dict.features.sectionDescription}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
-              {/* Feature 1 - Spans 2 */}
-              <div className="md:col-span-2 group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card">
-                <div className="relative z-10 flex h-full flex-col justify-between">
-                  <div className="text-start">
-                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
-                      <span className="material-symbols-outlined">sync_alt</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-text-main">{dict.features.sync.title}</h3>
-                    <p className="mt-2 text-text-muted max-w-md">{dict.features.sync.description}</p>
-                  </div>
-                  <div className="mt-8 h-32 w-full rounded-lg bg-background-offset border border-border-light relative overflow-hidden">
-                    <div className={`absolute inset-0 flex items-center justify-around ${isRtl ? 'flex-row-reverse' : ''}`}>
-                      <div className="w-16 h-16 rounded border border-primary/20 bg-white shadow-sm animate-pulse"></div>
-                      <span className={`material-symbols-outlined text-primary-dark/50 ${isRtl ? 'rotate-180' : ''}`}>arrow_forward</span>
-                      <div className="w-16 h-16 rounded border border-primary/20 bg-white shadow-sm animate-pulse delay-75"></div>
-                      <span className={`material-symbols-outlined text-primary-dark/50 ${isRtl ? 'rotate-180' : ''}`}>arrow_forward</span>
-                      <div className="w-16 h-16 rounded border border-primary/20 bg-white shadow-sm animate-pulse delay-150"></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/5 blur-3xl transition-all group-hover:bg-primary/10"></div>
-              </div>
-
-              {/* Feature 2 - Talk to Tia */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
+              {/* Feature 1 - Omni-Channel CRM */}
               <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
                 <div className="relative z-10 flex h-full flex-col">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
-                    <span className="material-symbols-outlined">smart_toy</span>
+                    <span className="material-symbols-outlined text-[24px]">hub</span>
                   </div>
-                  <h3 className="text-xl font-bold text-text-main">{dict.features.ai.title}</h3>
-                  <p className="mt-2 text-text-muted">{dict.features.ai.description}</p>
-                  <div className={`mt-auto pt-6 flex ${isRtl ? 'justify-start' : 'justify-end'}`}>
-                    <div className={`${isRtl ? 'rounded-r-xl' : 'rounded-l-xl'} rounded-t-xl bg-slate-50 border border-border-light p-3 max-w-[80%] text-xs text-text-muted shadow-sm`}>
-                      {lang === 'ar' ? 'جاري تشغيل تحليل مخاطر المحفظة #429...' : 'Running risk analysis on portfolio #429...'}
-                    </div>
-                  </div>
+                  <h3 className="text-xl font-bold text-text-main">{dict.features.crm.title}</h3>
+                  <p className="mt-2 text-text-muted">{dict.features.crm.description}</p>
                 </div>
-                <div className="absolute bottom-0 right-0 h-32 w-32 bg-gradient-to-tl from-primary/10 to-transparent"></div>
               </div>
 
-              {/* Feature 3 - Maker/Checker */}
+              {/* Feature 2 - Real Estate Engine */}
+              <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
+                    <span className="material-symbols-outlined text-[24px]">real_estate_agent</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-text-main">{dict.features.realEstate.title}</h3>
+                  <p className="mt-2 text-text-muted">{dict.features.realEstate.description}</p>
+                </div>
+              </div>
+
+              {/* Feature 3 - Dynamic Pipelines */}
+              <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
+                    <span className="material-symbols-outlined text-[24px]">view_kanban</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-text-main">{dict.features.pipelines.title}</h3>
+                  <p className="mt-2 text-text-muted">{dict.features.pipelines.description}</p>
+                </div>
+              </div>
+
+              {/* Feature 4 - Flow Automation */}
               <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
                 <div className="relative z-10">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
-                    <span className="material-symbols-outlined">verified_user</span>
+                    <span className="material-symbols-outlined text-[24px]">automation</span>
                   </div>
                   <h3 className="text-xl font-bold text-text-main">{dict.features.automation.title}</h3>
                   <p className="mt-2 text-text-muted">{dict.features.automation.description}</p>
                 </div>
               </div>
 
-              {/* Feature 4 - Serverless Scale */}
-              <div className="md:col-span-2 group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card">
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start md:items-center text-start">
-                  <div className="flex-1">
-                    <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
-                      <span className="material-symbols-outlined">cloud_upload</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-text-main">{dict.features.scale.title}</h3>
-                    <p className="mt-2 text-text-muted">{dict.features.scale.description}</p>
+              {/* Feature 5 - Support Helpdesk */}
+              <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
+                    <span className="material-symbols-outlined text-[24px]">support_agent</span>
                   </div>
-                  <div className="w-full md:w-1/3">
-                    <div className="flex flex-col gap-2 bg-gray-50 p-4 rounded-lg border border-border-light">
-                      <div className="flex items-center justify-between text-xs text-text-muted font-medium">
-                        <span>{lang === 'ar' ? 'حمل المرور' : 'Traffic Load'}</span>
-                        <span className="text-primary-dark">99.99% {lang === 'ar' ? 'وقت التشغيل' : 'Uptime'}</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary w-3/4 rounded-full"></div>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-text-muted mt-2 font-medium">
-                        <span>{lang === 'ar' ? 'استجابة الخادم' : 'Server Response'}</span>
-                        <span className="text-primary-dark">12ms</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-primary w-1/4 rounded-full"></div>
-                      </div>
-                    </div>
+                  <h3 className="text-xl font-bold text-text-main">{dict.features.helpdesk.title}</h3>
+                  <p className="mt-2 text-text-muted">{dict.features.helpdesk.description}</p>
+                </div>
+              </div>
+              
+              {/* Feature 6 - Digital Documents */}
+              <div className="group relative overflow-hidden rounded-2xl border border-border-light bg-white p-8 transition-all hover:border-primary/50 hover:shadow-card-hover shadow-card text-start">
+                <div className="relative z-10 flex h-full flex-col">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary-dark">
+                    <span className="material-symbols-outlined text-[24px]">draw</span>
                   </div>
+                  <h3 className="text-xl font-bold text-text-main">{dict.features.documents.title}</h3>
+                  <p className="mt-2 text-text-muted">{dict.features.documents.description}</p>
                 </div>
               </div>
             </div>
@@ -239,12 +226,12 @@ export default async function Home({
             <h2 className="text-3xl font-bold tracking-tight text-text-main sm:text-4xl">{dict.cta.title}</h2>
             <p className="mt-4 text-lg text-text-muted">{dict.cta.description}</p>
             <div className="mt-10 flex justify-center gap-4">
-              <button className="flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-base font-bold text-slate-900 transition-all hover:bg-primary-hover hover:scale-105 shadow-glow shadow-primary/30">
+              <Link href={`/${lang}/signup`} className="flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-base font-bold text-slate-900 transition-all hover:bg-primary-hover hover:scale-105 shadow-glow shadow-primary/30">
                 {dict.common.freeTrial}
-              </button>
-              <button className="flex h-12 items-center justify-center rounded-lg border border-border-light bg-white px-8 text-base font-bold text-text-main transition-colors hover:bg-gray-50 hover:border-gray-300">
-                {dict.common.contactSales}
-              </button>
+              </Link>
+              <Link href={`/${lang}/login`} className="flex h-12 items-center justify-center rounded-lg border border-border-light bg-white px-8 text-base font-bold text-text-main transition-colors hover:bg-gray-50 hover:border-gray-300">
+                {dict.common.signIn}
+              </Link>
             </div>
           </div>
         </section>

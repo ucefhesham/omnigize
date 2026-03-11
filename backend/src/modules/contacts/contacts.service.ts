@@ -32,7 +32,7 @@ export class ContactsService {
   }
 
   async findAll(workspaceId: string, filter?: ContactFilterDto) {
-    const where: any = { workspaceId };
+    const where: any = { workspaceId, deletedAt: null };
 
     if (filter?.search) {
       where.OR = [
@@ -71,7 +71,7 @@ export class ContactsService {
 
   async findOne(id: string, workspaceId: string) {
     const contact = await this.prisma.contact.findFirst({
-      where: { id, workspaceId },
+      where: { id, workspaceId, deletedAt: null },
       include: {
         owner: {
           select: {
@@ -127,6 +127,6 @@ export class ContactsService {
   }
 
   async getCount(workspaceId: string): Promise<number> {
-    return this.prisma.contact.count({ where: { workspaceId } });
+    return this.prisma.contact.count({ where: { workspaceId, deletedAt: null } });
   }
 }

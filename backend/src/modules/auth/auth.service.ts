@@ -4,9 +4,12 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { TokenBlacklistService } from './token-blacklist.service';
+import { EmailVerificationService } from './email-verification.service';
 
 interface UserWithRelations {
   id: string;
@@ -26,7 +29,18 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private configService: ConfigService,
+    private tokenBlacklistService: TokenBlacklistService,
+    private emailVerificationService: EmailVerificationService,
   ) {}
+
+  private getRefreshSecret(): string {
+    const secret = this.configService.get<string>('JWT_REFRESH_SECRET');
+    if (!secret) {
+      throw new Error('JWT_REFRESH_SECRET environment variable is required');
+    }
+    return secret;
+  }
 
   async validateUser(
     email: string,
@@ -87,7 +101,7 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, {
         expiresIn: '30d',
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: this.getRefreshSecret(),
       }),
       user: {
         id: user.id,
@@ -166,11 +180,14 @@ export class AuthService {
       workspaceId: user.workspaceId,
     };
 
+    // Send verification email
+    await this.emailVerificationService.sendVerificationEmail(user.id);
+
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, {
         expiresIn: '30d',
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: this.getRefreshSecret(),
       }),
       user: {
         id: user.id,
@@ -185,7 +202,7 @@ export class AuthService {
   async refreshToken(token: string) {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: this.getRefreshSecret(),
       });
 
       const user = await this.prisma.user.findUnique({
@@ -214,11 +231,20 @@ export class AuthService {
         access_token: this.jwtService.sign(newPayload),
         refresh_token: this.jwtService.sign(newPayload, {
           expiresIn: '30d',
-          secret: process.env.JWT_REFRESH_SECRET,
+          secret: this.getRefreshSecret(),
         }),
       };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  async logout(token: string): Promise<boolean> {
+    this.tokenBlacklistService.add(token);
+    return true;
+  }
+
+  async verifyEmail(token: string): Promise<boolean> {
+    return this.emailVerificationService.verifyEmail(token);
   }
 }

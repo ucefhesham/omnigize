@@ -23,28 +23,40 @@
   },
   "trustedBy": "Trusted by leading MENA Brokerages",
   "features": {
-    "sectionTitle": "Powering the Future of Finance",
-    "sectionDescription": "Everything you need to run a modern, compliant, and scalable brokerage in one operating system. Built for speed, security, and scale.",
-    "sync": {
-      "title": "Omni-Channel Sync",
-      "description": "Real-time synchronization across all your trading platforms, CRM, and customer touchpoints. Changes propagate instantly."
+    "sectionTitle": "Powering the Future of Enterprise",
+    "sectionDescription": "Omnigize seamlessly unifies multiple powerful modules into a single operating system. Manage clients, properties, workflows, and support without switching tabs.",
+    "crm": {
+      "title": "Omni-Channel CRM",
+      "description": "Centralize Contacts, Leads, and Deals. Track conversions, metadata, and communication history across multiple channels."
     },
-    "ai": {
-      "title": "Talk to Tia AI",
-      "description": "Your dedicated AI assistant for predictive analytics and automated customer support. Handles 80% of L1 queries."
+    "realEstate": {
+      "title": "Real Estate Engine",
+      "description": "Built-in property management. Track statuses, locations, pricing, and associate properties directly with sales deals."
+    },
+    "pipelines": {
+      "title": "Dynamic Pipelines",
+      "description": "Create custom sales stages, conditional transitions, and drag-and-drop visual boards tailored to any business entity."
     },
     "automation": {
-      "title": "Maker/Checker Automation",
-      "description": "Secure approval workflows designed for enterprise compliance. Set custom rules for transaction limits and user roles."
+      "title": "Flow Automation",
+      "description": "Trigger automated actions, webhooks, and complex Maker/Checker approval workflows based on rigorous predefined rules."
     },
-    "scale": {
-      "title": "Serverless Scale",
-      "description": "Infrastructure that grows with you. Handle millions of transactions without downtime. Zero maintenance overhead for your IT team."
+    "helpdesk": {
+      "title": "Support Helpdesk",
+      "description": "Integrated omnichannel ticketing. Auto-assign agents, track resolutions, and monitor SLA performance priorities."
+    },
+    "documents": {
+      "title": "Digital Documents",
+      "description": "Manage contracts directly attached to Deals. Track statuses from Draft to Pending Approval to fully Signed."
     }
   },
   "cta": {
-    "title": "Ready to modernize your operations?",
-    "description": "Join the fastest growing brokerages in the MENA region using Omnigize."
+    "title": "Ready to unify your operations?",
+    "description": "Join modern enterprises across the MENA region accelerating their growth with Omnigize."
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية"
   },
   "footer": {
     "privacy": "Privacy",
@@ -52,5 +64,34 @@
     "security": "Security",
     "status": "Status",
     "rights": "All rights reserved."
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Enter your credentials to access your workspace",
+    "signupTitle": "Create an account",
+    "signupSubtitle": "Start your 14-day free trial. No credit card required.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "name@company.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "••••••••",
+    "firstNameLabel": "First name",
+    "firstNamePlaceholder": "John",
+    "lastNameLabel": "Last name",
+    "lastNamePlaceholder": "Doe",
+    "workspaceLabel": "Workspace name (Optional)",
+    "workspacePlaceholder": "Acme Corp",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "signInButton": "Sign in securely",
+    "signUpButton": "Create account",
+    "signingIn": "Signing in...",
+    "signingUp": "Creating account...",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUpLink": "Sign up",
+    "signInLink": "Sign in",
+    "termsText": "By creating an account, you agree to our",
+    "termsLink": "Terms of Service",
+    "privacyLink": "Privacy Policy"
   }
 }

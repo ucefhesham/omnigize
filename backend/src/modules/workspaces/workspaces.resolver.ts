@@ -10,8 +10,8 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';
-import { CurrentUser } from '../../common/decorators';
-import { AuthGuard } from '../../common/guards';
+import { CurrentUser, Roles } from '../../common/decorators';
+import { AuthGuard, RolesGuard } from '../../common/guards';
 
 @ObjectType()
 export class WorkspaceResponse {
@@ -89,7 +89,8 @@ export class WorkspacesResolver {
     return this.workspacesService.getStatistics(id, user.id);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Admin')
   @Mutation(() => WorkspaceResponse)
   async updateWorkspace(
     @Args('id', { type: () => ID }) id: string,
@@ -99,7 +100,8 @@ export class WorkspacesResolver {
     return this.workspacesService.update(id, user.id, updateWorkspaceDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('Admin')
   @Mutation(() => Boolean)
   async deleteWorkspace(
     @Args('id', { type: () => ID }) id: string,

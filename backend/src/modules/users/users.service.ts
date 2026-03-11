@@ -10,7 +10,10 @@ import { UpdateUserDto, AssignRoleDto } from './dto/user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(workspaceId: string) {
+  async findAll(workspaceId: string, page: number = 1, limit: number = 50) {
+    const safePage = Math.max(1, page);
+    const safeLimit = Math.min(Math.max(1, limit), 100); // Cap at 100
+
     return this.prisma.user.findMany({
       where: {
         workspaceId,
@@ -28,6 +31,8 @@ export class UsersService {
       orderBy: {
         createdAt: 'desc',
       },
+      take: safeLimit,
+      skip: (safePage - 1) * safeLimit,
     });
   }
 
@@ -78,7 +83,6 @@ export class UsersService {
       where: { id },
       data: {
         deletedAt: new Date(),
-        email: undefined,
       },
     });
   }

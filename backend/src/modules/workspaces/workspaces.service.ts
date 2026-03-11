@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';
@@ -160,25 +161,47 @@ export class WorkspacesService {
       where: { id: userId },
     });
 
-    if (user?.workspaceId !== id) {
-      throw new NotFoundException('You can only delete your own workspace');
+    if (!user?.isWorkspaceOwner || user.workspaceId !== id) {
+      throw new ForbiddenException(
+        'Only the workspace owner can delete this workspace',
+      );
     }
 
-    return this.prisma.workspace.delete({
+    // Soft-delete instead of hard-delete for data protection
+    return this.prisma.workspace.update({
       where: { id },
+      data: {
+        isActive: false,
+      },
     });
   }
 
   async getStatistics(id: string, userId: string) {
     const workspace = await this.findOne(id, userId);
 
+    // Use _count from findOne if available, otherwise fallback to individual counts
+    const counts = (workspace as any)._count;
+    if (counts) {
+      return {
+        ...workspace,
+        statistics: {
+          contacts: counts.contacts || 0,
+          leads: counts.leads || 0,
+          deals: counts.deals || 0,
+          properties: counts.properties || 0,
+          users: counts.users || 0,
+        },
+      };
+    }
+
+    // Fallback: individual count queries (exclude soft-deleted)
     const [contactsCount, leadsCount, dealsCount, propertiesCount, usersCount] =
       await Promise.all([
-        this.prisma.contact.count({ where: { workspaceId: id } }),
-        this.prisma.lead.count({ where: { workspaceId: id } }),
-        this.prisma.deal.count({ where: { workspaceId: id } }),
+        this.prisma.contact.count({ where: { workspaceId: id, deletedAt: null } }),
+        this.prisma.lead.count({ where: { workspaceId: id, deletedAt: null } }),
+        this.prisma.deal.count({ where: { workspaceId: id, deletedAt: null } }),
         this.prisma.property.count({ where: { workspaceId: id } }),
-        this.prisma.user.count({ where: { workspaceId: id } }),
+        this.prisma.user.count({ where: { workspaceId: id, deletedAt: null } }),
       ]);
 
     return {

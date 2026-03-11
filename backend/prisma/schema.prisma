@@ -67,6 +67,7 @@ enum FieldType {
 model Workspace {
   id                String   @id @default(uuid())
   name              String
+  slug              String   @unique
   domain            String?  @unique
   industry          String   @default("General")
   logo              String?

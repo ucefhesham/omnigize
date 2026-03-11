@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { UsersModule } from './modules/users/users.module';
+import { EventsModule } from './modules/events/events.module';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor } from './common/interceptors';
 import {
@@ -42,6 +43,7 @@ import {
     AuthModule,
     WorkspacesModule,
     UsersModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [

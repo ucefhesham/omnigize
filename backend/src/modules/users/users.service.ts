@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto, AssignRoleDto } from './dto/user.dto';
 
@@ -79,7 +83,11 @@ export class UsersService {
     });
   }
 
-  async assignRole(id: string, workspaceId: string, assignRoleDto: AssignRoleDto) {
+  async assignRole(
+    id: string,
+    workspaceId: string,
+    assignRoleDto: AssignRoleDto,
+  ) {
     const user = await this.findOne(id, workspaceId);
 
     const role = await this.prisma.role.findFirst({
@@ -131,7 +139,11 @@ export class UsersService {
     return this.findOne(userId, workspaceId);
   }
 
-  async updateProfile(userId: string, workspaceId: string, updateUserDto: UpdateUserDto) {
+  async updateProfile(
+    userId: string,
+    workspaceId: string,
+    updateUserDto: UpdateUserDto,
+  ) {
     return this.update(userId, workspaceId, updateUserDto);
   }
 }

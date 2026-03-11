@@ -10,14 +10,17 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 export class WorkspaceGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    const workspaceId = request.headers['x-workspace-id'];
+    const req = ctx.getContext().req as {
+      headers: Record<string, string>;
+      workspaceId?: string;
+    };
+    const workspaceId = req?.headers?.['x-workspace-id'];
 
     if (!workspaceId) {
       throw new BadRequestException('Workspace ID is required');
     }
 
-    request.workspaceId = workspaceId;
+    req.workspaceId = workspaceId;
     return true;
   }
 }

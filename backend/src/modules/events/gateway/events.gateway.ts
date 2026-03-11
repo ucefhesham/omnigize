@@ -15,7 +15,9 @@ import { JwtService } from '@nestjs/jwt';
     origin: '*',
   },
 })
-export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class EventsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -30,8 +32,9 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.auth?.token || 
-                    client.handshake.headers?.authorization?.replace('Bearer ', '');
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.replace('Bearer ', '');
 
       if (!token) {
         this.logger.warn(`Client ${client.id} connected without token`);
@@ -66,8 +69,10 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('message')
   handleMessage(client: Socket, payload: any): void {
-    this.logger.log(`Message received from ${client.id}: ${JSON.stringify(payload)}`);
-    
+    this.logger.log(
+      `Message received from ${client.id}: ${JSON.stringify(payload)}`,
+    );
+
     if (payload.to) {
       client.to(`user:${payload.to}`).emit('message', {
         from: client.data.userId,

@@ -1,4 +1,12 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field, ID } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ObjectType,
+  Field,
+  ID,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';

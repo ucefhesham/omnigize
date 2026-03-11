@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';
 
@@ -10,7 +14,9 @@ export class WorkspacesService {
     const workspace = await this.prisma.workspace.create({
       data: {
         name: createWorkspaceDto.name,
-        slug: createWorkspaceDto.slug || createWorkspaceDto.name.toLowerCase().replace(/\s+/g, '-'),
+        slug:
+          createWorkspaceDto.slug ||
+          createWorkspaceDto.name.toLowerCase().replace(/\s+/g, '-'),
         domain: createWorkspaceDto.domain,
         industry: createWorkspaceDto.industry || 'General',
         logo: createWorkspaceDto.logo,
@@ -121,7 +127,11 @@ export class WorkspacesService {
     return workspace;
   }
 
-  async update(id: string, userId: string, updateWorkspaceDto: UpdateWorkspaceDto) {
+  async update(
+    id: string,
+    userId: string,
+    updateWorkspaceDto: UpdateWorkspaceDto,
+  ) {
     await this.findOne(id, userId);
 
     if (updateWorkspaceDto.slug) {
@@ -162,13 +172,14 @@ export class WorkspacesService {
   async getStatistics(id: string, userId: string) {
     const workspace = await this.findOne(id, userId);
 
-    const [contactsCount, leadsCount, dealsCount, propertiesCount, usersCount] = await Promise.all([
-      this.prisma.contact.count({ where: { workspaceId: id } }),
-      this.prisma.lead.count({ where: { workspaceId: id } }),
-      this.prisma.deal.count({ where: { workspaceId: id } }),
-      this.prisma.property.count({ where: { workspaceId: id } }),
-      this.prisma.user.count({ where: { workspaceId: id } }),
-    ]);
+    const [contactsCount, leadsCount, dealsCount, propertiesCount, usersCount] =
+      await Promise.all([
+        this.prisma.contact.count({ where: { workspaceId: id } }),
+        this.prisma.lead.count({ where: { workspaceId: id } }),
+        this.prisma.deal.count({ where: { workspaceId: id } }),
+        this.prisma.property.count({ where: { workspaceId: id } }),
+        this.prisma.user.count({ where: { workspaceId: id } }),
+      ]);
 
     return {
       ...workspace,

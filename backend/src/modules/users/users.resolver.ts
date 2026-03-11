@@ -1,4 +1,13 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ObjectType,
+  Field,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, AssignRoleDto } from './dto/user.dto';
@@ -115,6 +124,10 @@ export class UsersResolver {
     @Args('updateUserDto') updateUserDto: UpdateUserDto,
     @CurrentUser() user: any,
   ) {
-    return this.usersService.updateProfile(user.id, user.workspaceId, updateUserDto);
+    return this.usersService.updateProfile(
+      user.id,
+      user.workspaceId,
+      updateUserDto,
+    );
   }
 }

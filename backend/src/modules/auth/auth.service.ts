@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -24,7 +28,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<UserWithRelations | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserWithRelations | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       include: {
@@ -113,9 +120,11 @@ export class AuthService {
     } else {
       workspace = await this.prisma.workspace.create({
         data: {
-          name: registerDto.workspaceName || `${registerDto.firstName}'s Workspace`,
-          slug: registerDto.workspaceName?.toLowerCase().replace(/\s+/g, '-') || 
-                `${registerDto.firstName.toLowerCase()}-workspace`,
+          name:
+            registerDto.workspaceName || `${registerDto.firstName}'s Workspace`,
+          slug:
+            registerDto.workspaceName?.toLowerCase().replace(/\s+/g, '-') ||
+            `${registerDto.firstName.toLowerCase()}-workspace`,
           settings: {},
         },
       });

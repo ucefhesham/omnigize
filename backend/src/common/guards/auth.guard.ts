@@ -8,6 +8,10 @@ import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { IS_PUBLIC_KEY } from '../decorators';
 
+interface RequestWithUser {
+  user?: unknown;
+}
+
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -23,9 +27,9 @@ export class AuthGuard implements CanActivate {
     }
 
     const ctx = GqlExecutionContext.create(context);
-    const request = ctx.getContext().req;
-    
-    if (!request.user) {
+    const request = ctx.getContext().req as { user?: unknown };
+
+    if (!request?.user) {
       throw new UnauthorizedException('You are not authenticated');
     }
 

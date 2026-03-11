@@ -7,17 +7,23 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { GqlExceptionFilter, GqlExecutionContext } from '@nestjs/graphql';
+import { GqlExceptionFilter } from '@nestjs/graphql';
+
+interface HttpExceptionResponse {
+  message?: unknown;
+}
 
 @Catch()
-export class AllExceptionsFilter implements GqlExceptionFilter, ExceptionFilter {
+export class AllExceptionsFilter
+  implements GqlExceptionFilter, ExceptionFilter
+{
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const isHttp = ctx.getResponse<Response>();
-    const isGraphQL = !isHttp;
-    
+    const response = ctx.getResponse<Response>();
+    const isGraphQL = !response;
+
     if (isGraphQL) {
       return this.handleGraphQLException(exception);
     }
@@ -30,17 +36,19 @@ export class AllExceptionsFilter implements GqlExceptionFilter, ExceptionFilter 
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = exception instanceof HttpException
-      ? exception.getResponse()
-      : 'Internal server error';
+    const message =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : 'Internal server error';
 
     this.logger.error(
       `${request.method} ${request.url} - Status: ${status}`,
-      exception instanceof Error ? exception.stack : ''
+      exception instanceof Error ? exception.stack : '',
     );
 
     response.status(status).json({
@@ -52,23 +60,29 @@ export class AllExceptionsFilter implements GqlExceptionFilter, ExceptionFilter 
   }
 
   private handleGraphQLException(exception: unknown) {
-    const status = exception instanceof HttpException
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message = exception instanceof HttpException
-      ? (exception.getResponse() as any).message || exception.message
-      : 'Internal server error';
+    let message = 'Internal server error';
+    if (exception instanceof HttpException) {
+      const httpResponse = exception.getResponse() as HttpExceptionResponse;
+      message = String(httpResponse.message || exception.message);
+    }
 
     this.logger.error(
       `GraphQL Error: ${JSON.stringify(message)}`,
-      exception instanceof Error ? exception.stack : ''
+      exception instanceof Error ? exception.stack : '',
     );
 
     return {
       statusCode: status,
       message,
-      error: exception instanceof HttpException ? 'Http Exception' : 'Internal Server Error',
+      error:
+        exception instanceof HttpException
+          ? 'Http Exception'
+          : 'Internal Server Error',
     };
   }
 }

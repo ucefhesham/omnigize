@@ -1,10 +1,56 @@
 {
   "common": {
     "brand": "Omnigize",
-    "description": "All-in-one CRM solution"
+    "description": "All-in-one CRM solution",
+    "signIn": "Sign In",
+    "requestDemo": "Request Demo",
+    "requestEnterpriseDemo": "Request Enterprise Demo",
+    "freeTrial": "Start Free Trial",
+    "contactSales": "Contact Sales",
+    "viewDocs": "View Documentation"
   },
-  "home": {
-    "title": "Welcome to Omnigize",
-    "subtitle": "Your complete CRM solution"
+  "nav": {
+    "platform": "Platform",
+    "solutions": "Solutions",
+    "enterprise": "Enterprise",
+    "resources": "Resources"
+  },
+  "hero": {
+    "badge": "New: AI-Powered Risk Analytics",
+    "titlePart1": "The Ultimate Omni-Channel",
+    "titleHighlight": "Business OS",
+    "description": "Unify your brokerage operations, automate compliance, and scale effortlessly with our serverless enterprise platform designed for the modern financial ecosystem."
+  },
+  "trustedBy": "Trusted by leading MENA Brokerages",
+  "features": {
+    "sectionTitle": "Powering the Future of Finance",
+    "sectionDescription": "Everything you need to run a modern, compliant, and scalable brokerage in one operating system. Built for speed, security, and scale.",
+    "sync": {
+      "title": "Omni-Channel Sync",
+      "description": "Real-time synchronization across all your trading platforms, CRM, and customer touchpoints. Changes propagate instantly."
+    },
+    "ai": {
+      "title": "Talk to Tia AI",
+      "description": "Your dedicated AI assistant for predictive analytics and automated customer support. Handles 80% of L1 queries."
+    },
+    "automation": {
+      "title": "Maker/Checker Automation",
+      "description": "Secure approval workflows designed for enterprise compliance. Set custom rules for transaction limits and user roles."
+    },
+    "scale": {
+      "title": "Serverless Scale",
+      "description": "Infrastructure that grows with you. Handle millions of transactions without downtime. Zero maintenance overhead for your IT team."
+    }
+  },
+  "cta": {
+    "title": "Ready to modernize your operations?",
+    "description": "Join the fastest growing brokerages in the MENA region using Omnigize."
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "security": "Security",
+    "status": "Status",
+    "rights": "All rights reserved."
   }
 }

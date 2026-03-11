@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cairo } from "next/font/google";
 import "../globals.css";
 import { i18n, type Locale } from "../../i18n-config";
 
@@ -11,6 +11,11 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic"],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +35,11 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = (await params) as { lang: Locale };
-  const dir = lang === "ar" ? "rtl" : "ltr";
+  const isRtl = lang === "ar";
+  const dir = isRtl ? "rtl" : "ltr";
+  
+  // Use Cairo for Arabic, Geist for English
+  const fontVariable = isRtl ? cairo.variable : geistSans.variable;
 
   return (
     <html lang={lang} dir={dir}>
@@ -41,7 +50,8 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${fontVariable} ${geistMono.variable} antialiased`}
+        style={isRtl ? { fontFamily: 'var(--font-cairo), sans-serif' } : {}}
       >
         {children}
       </body>

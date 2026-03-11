@@ -1,4 +1,14 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ObjectType,
+  Field,
+  ID,
+  Int,
+  Float,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { DealsService } from './deals.service';
 import { CreateDealDto, UpdateDealDto, DealFilterDto } from './dto/deal.dto';

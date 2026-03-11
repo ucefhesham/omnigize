@@ -6,12 +6,11 @@ import {
   ObjectType,
   Field,
   ID,
-  Int,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UpdateUserDto, AssignRoleDto } from './dto/user.dto';
-import { Public, CurrentUser } from '../../common/decorators';
+import { UpdateUserDto, AssignRoleDto } from './dto/user.dto';
+import { CurrentUser } from '../../common/decorators';
 import { AuthGuard } from '../../common/guards';
 
 @ObjectType()

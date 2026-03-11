@@ -10,7 +10,7 @@ import {
 import { UseGuards } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';
-import { Public, CurrentUser } from '../../common/decorators';
+import { CurrentUser } from '../../common/decorators';
 import { AuthGuard } from '../../common/guards';
 
 @ObjectType()

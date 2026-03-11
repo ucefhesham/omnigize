@@ -6,7 +6,11 @@ import { CreateLeadDto, UpdateLeadDto, LeadFilterDto } from './dto/lead.dto';
 export class LeadsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(workspaceId: string, createLeadDto: CreateLeadDto, userId: string) {
+  async create(
+    workspaceId: string,
+    createLeadDto: CreateLeadDto,
+    userId: string,
+  ) {
     return this.prisma.lead.create({
       data: {
         workspaceId,

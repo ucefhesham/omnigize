@@ -8,14 +8,6 @@ import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { ROLES_KEY } from '../decorators';
 
-interface UserWithRoles {
-  roles?: string[];
-}
-
-interface RequestWithUser {
-  user?: UserWithRoles;
-}
-
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}

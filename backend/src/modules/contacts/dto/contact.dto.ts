@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsEmail, IsArray, IsEnum, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsArray,
+  IsEnum,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { ChannelType } from '@prisma/client';
 
 export class CreateContactDto {

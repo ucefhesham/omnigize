@@ -1,12 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateContactDto, UpdateContactDto, ContactFilterDto } from './dto/contact.dto';
+import {
+  CreateContactDto,
+  UpdateContactDto,
+  ContactFilterDto,
+} from './dto/contact.dto';
 
 @Injectable()
 export class ContactsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(workspaceId: string, createContactDto: CreateContactDto, userId: string) {
+  async create(
+    workspaceId: string,
+    createContactDto: CreateContactDto,
+    userId: string,
+  ) {
     return this.prisma.contact.create({
       data: {
         workspaceId,
@@ -87,7 +95,11 @@ export class ContactsService {
     return contact;
   }
 
-  async update(id: string, workspaceId: string, updateContactDto: UpdateContactDto) {
+  async update(
+    id: string,
+    workspaceId: string,
+    updateContactDto: UpdateContactDto,
+  ) {
     await this.findOne(id, workspaceId);
 
     return this.prisma.contact.update({

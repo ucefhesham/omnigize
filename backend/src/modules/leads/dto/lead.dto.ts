@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsEmail, IsArray, IsEnum, IsNumber, IsUUID, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { ChannelType } from '@prisma/client';
 
 export class CreateLeadDto {

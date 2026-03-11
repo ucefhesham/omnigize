@@ -6,7 +6,11 @@ import { CreateDealDto, UpdateDealDto, DealFilterDto } from './dto/deal.dto';
 export class DealsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(workspaceId: string, createDealDto: CreateDealDto, userId: string) {
+  async create(
+    workspaceId: string,
+    createDealDto: CreateDealDto,
+    userId: string,
+  ) {
     return this.prisma.deal.create({
       data: {
         workspaceId,
@@ -16,7 +20,9 @@ export class DealsService {
         value: createDealDto.value || 0,
         currency: createDealDto.currency || 'USD',
         probability: createDealDto.probability || 50,
-        expectedCloseDate: createDealDto.expectedCloseDate ? new Date(createDealDto.expectedCloseDate) : undefined,
+        expectedCloseDate: createDealDto.expectedCloseDate
+          ? new Date(createDealDto.expectedCloseDate)
+          : undefined,
         metadata: createDealDto.metadata || {},
         tags: createDealDto.tags || [],
       },
@@ -27,9 +33,7 @@ export class DealsService {
     const where: any = { workspaceId };
 
     if (filter?.search) {
-      where.OR = [
-        { title: { contains: filter.search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ title: { contains: filter.search, mode: 'insensitive' } }];
     }
 
     if (filter?.ownerId) {
@@ -92,8 +96,12 @@ export class DealsService {
         value: updateDealDto.value,
         currency: updateDealDto.currency,
         probability: updateDealDto.probability,
-        expectedCloseDate: updateDealDto.expectedCloseDate ? new Date(updateDealDto.expectedCloseDate) : undefined,
-        actualCloseDate: updateDealDto.actualCloseDate ? new Date(updateDealDto.actualCloseDate) : undefined,
+        expectedCloseDate: updateDealDto.expectedCloseDate
+          ? new Date(updateDealDto.expectedCloseDate)
+          : undefined,
+        actualCloseDate: updateDealDto.actualCloseDate
+          ? new Date(updateDealDto.actualCloseDate)
+          : undefined,
         metadata: updateDealDto.metadata,
         tags: updateDealDto.tags,
       },

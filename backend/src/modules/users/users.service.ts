@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { CreateUserDto, UpdateUserDto, AssignRoleDto } from './dto/user.dto';
+import { UpdateUserDto, AssignRoleDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -88,7 +88,7 @@ export class UsersService {
     workspaceId: string,
     assignRoleDto: AssignRoleDto,
   ) {
-    const user = await this.findOne(id, workspaceId);
+    await this.findOne(id, workspaceId);
 
     const role = await this.prisma.role.findFirst({
       where: {

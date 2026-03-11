@@ -26,7 +26,7 @@ export class EventsGateway
 
   constructor(private jwtService: JwtService) {}
 
-  afterInit(server: Server) {
+  afterInit(_server: Server) {
     this.logger.log('WebSocket Gateway initialized');
   }
 
@@ -53,7 +53,7 @@ export class EventsGateway
       client.join(`user:${userId}`);
 
       this.logger.log(`Client ${client.id} connected as user ${userId}`);
-    } catch (error) {
+    } catch (_error) {
       this.logger.warn(`Client ${client.id} failed to authenticate`);
       client.disconnect();
     }

@@ -38,7 +38,7 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
           extensions?: unknown;
         };
         return {
-          message: String(err.message || 'Internal server error'),
+          message: err.message ? String(err.message) : 'Internal server error',
           locations: err.locations as any,
           path: err.path as any,
           extensions: err.extensions as any,

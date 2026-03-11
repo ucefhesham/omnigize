@@ -68,7 +68,9 @@ export class AllExceptionsFilter
     let message = 'Internal server error';
     if (exception instanceof HttpException) {
       const httpResponse = exception.getResponse() as HttpExceptionResponse;
-      message = String(httpResponse.message || exception.message);
+      message = httpResponse.message
+        ? String(httpResponse.message)
+        : exception.message;
     }
 
     this.logger.error(

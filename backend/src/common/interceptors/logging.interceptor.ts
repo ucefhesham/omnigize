@@ -9,11 +9,6 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
-interface GraphQLInfo {
-  operation?: { operation?: string };
-  fieldName?: string;
-}
-
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
   private readonly logger = new Logger('HTTP');

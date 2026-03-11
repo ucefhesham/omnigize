@@ -1,7 +1,20 @@
-import { Resolver, Query, Mutation, Args, ObjectType, Field, ID, Int } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ObjectType,
+  Field,
+  ID,
+  Int,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
-import { CreateContactDto, UpdateContactDto, ContactFilterDto } from './dto/contact.dto';
+import {
+  CreateContactDto,
+  UpdateContactDto,
+  ContactFilterDto,
+} from './dto/contact.dto';
 import { CurrentUser } from '../../common/decorators';
 import { AuthGuard } from '../../common/guards';
 
@@ -63,7 +76,11 @@ export class ContactsResolver {
     @Args('createContactDto') createContactDto: CreateContactDto,
     @CurrentUser() user: any,
   ) {
-    return this.contactsService.create(user.workspaceId, createContactDto, user.id);
+    return this.contactsService.create(
+      user.workspaceId,
+      createContactDto,
+      user.id,
+    );
   }
 
   @UseGuards(AuthGuard)

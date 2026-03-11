@@ -3,8 +3,10 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { DatabaseService } from '../../../database/database.service';
 import { TokenBlacklistService } from '../token-blacklist.service';
+import { users } from '../../../db/schema';
+import { eq, isNull, and } from 'drizzle-orm';
 
 export interface JwtPayload {
   sub: string;
@@ -16,7 +18,7 @@ export interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private prisma: PrismaService,
+    private dbService: DatabaseService,
     private tokenBlacklistService: TokenBlacklistService,
   ) {
     const secret = configService.get<string>('JWT_SECRET');
@@ -32,23 +34,22 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: Request, payload: JwtPayload) {
-    // Check if the token has been blacklisted (e.g. after logout)
     const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
     if (token && this.tokenBlacklistService.isBlacklisted(token)) {
       throw new UnauthorizedException('Token has been revoked');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-      include: {
+    const user = await this.dbService.db.query.users.findFirst({
+      where: and(eq(users.id, payload.sub), isNull(users.deletedAt)),
+      with: {
         department: true,
         team: true,
         userRoles: {
-          include: {
+          with: {
             role: {
-              include: {
-                permissions: {
-                  include: {
+              with: {
+                rolePermissions: {
+                  with: {
                     permission: true,
                   },
                 },
@@ -60,7 +61,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       },
     });
 
-    if (!user || user.deletedAt) {
+    if (!user) {
       throw new UnauthorizedException('User not found or deleted');
     }
 
@@ -76,7 +77,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       team: user.team,
       roles: user.userRoles.map((ur) => ur.role.name),
       permissions: user.userRoles.flatMap(
-        (ur) => ur.role.permissions.map((rp) => rp.permission.action) || [],
+        (ur) => ur.role.rolePermissions.map((rp) => rp.permission.action) || [],
       ),
     };
   }

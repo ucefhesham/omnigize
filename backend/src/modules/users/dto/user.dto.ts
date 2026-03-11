@@ -1,5 +1,8 @@
 import { IsString, IsOptional, IsEmail, IsUUID, IsEnum } from 'class-validator';
-import { UserStatus } from '@prisma/client';
+import type { ChannelType } from '../../../db/schema/enums';
+import type { UserStatus } from '../../../db/schema/enums';
+import { channelTypeEnum } from '../../../db/schema/enums';
+import { userStatusEnum } from '../../../db/schema/enums';
 
 export class CreateUserDto {
   @IsEmail()
@@ -42,7 +45,7 @@ export class UpdateUserDto {
   teamId?: string;
 
   @IsOptional()
-  @IsEnum(UserStatus)
+  @IsEnum(userStatusEnum.enumValues)
   status?: UserStatus;
 }
 

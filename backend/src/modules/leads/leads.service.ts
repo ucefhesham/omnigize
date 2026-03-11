@@ -1,81 +1,80 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { CreateLeadDto, UpdateLeadDto, LeadFilterDto } from './dto/lead.dto';
+import { insertLeadSchema } from '../../db/zod';
+import { leads } from '../../db/schema';
+import { eq, and, isNull, ilike, or, desc, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private dbService: DatabaseService) {}
 
-  async create(
-    workspaceId: string,
-    createLeadDto: CreateLeadDto,
-    userId: string,
-  ) {
-    return this.prisma.lead.create({
-      data: {
-        workspaceId,
-        ownerId: userId,
-        firstName: createLeadDto.firstName,
-        lastName: createLeadDto.lastName,
-        email: createLeadDto.email,
-        phone: createLeadDto.phone,
-        companyName: createLeadDto.companyName,
-        sourceChannel: createLeadDto.sourceChannel,
-        metadata: createLeadDto.metadata || {},
-        tags: createLeadDto.tags || [],
-      },
+  async create(workspaceId: string, createLeadDto: CreateLeadDto, userId: string) {
+    // Validate inputs using our custom strict Zod override schema
+    const newLeadData = insertLeadSchema.parse({
+      ...createLeadDto,
+      workspaceId,
+      ownerId: userId,
+      metadata: createLeadDto.metadata || {},
+      tags: createLeadDto.tags || [],
     });
+
+    const [lead] = await this.dbService.db
+      .insert(leads)
+      .values(newLeadData)
+      .returning();
+
+    return lead;
   }
 
   async findAll(workspaceId: string, filter?: LeadFilterDto) {
-    const where: any = { workspaceId, deletedAt: null };
+    const conditions: (SQL | undefined)[] = [
+      eq(leads.workspaceId, workspaceId),
+      isNull(leads.deletedAt),
+    ];
 
     if (filter?.search) {
-      where.OR = [
-        { firstName: { contains: filter.search, mode: 'insensitive' } },
-        { lastName: { contains: filter.search, mode: 'insensitive' } },
-        { email: { contains: filter.search, mode: 'insensitive' } },
-        { companyName: { contains: filter.search, mode: 'insensitive' } },
-      ];
+      conditions.push(
+        or(
+          ilike(leads.firstName, `%${filter.search}%`),
+          ilike(leads.lastName, `%${filter.search}%`),
+          ilike(leads.email, `%${filter.search}%`),
+          ilike(leads.companyName, `%${filter.search}%`)
+        )
+      );
     }
 
     if (filter?.ownerId) {
-      where.ownerId = filter.ownerId;
+      conditions.push(eq(leads.ownerId, filter.ownerId));
     }
 
-    return this.prisma.lead.findMany({
-      where,
-      include: {
+    return this.dbService.db.query.leads.findMany({
+      where: and(...(conditions as any[])),
+      with: {
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-          },
+          columns: { id: true, firstName: true, lastName: true, avatar: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
-      take: filter?.limit || 50,
-      skip: filter?.offset || 0,
+      orderBy: [desc(leads.createdAt)],
+      limit: filter?.limit || 50,
+      offset: filter?.offset || 0,
     });
   }
 
   async findOne(id: string, workspaceId: string) {
-    const lead = await this.prisma.lead.findFirst({
-      where: { id, workspaceId, deletedAt: null },
-      include: {
+    const lead = await this.dbService.db.query.leads.findFirst({
+      where: and(
+        eq(leads.id, id),
+        eq(leads.workspaceId, workspaceId),
+        isNull(leads.deletedAt)
+      ),
+      with: {
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-          },
+          columns: { id: true, firstName: true, lastName: true, avatar: true },
         },
         deals: {
-          orderBy: { createdAt: 'desc' },
-          take: 5,
+          orderBy: (deals, { desc }) => [desc(deals.createdAt)],
+          limit: 5,
         },
       },
     });
@@ -90,37 +89,52 @@ export class LeadsService {
   async update(id: string, workspaceId: string, updateLeadDto: UpdateLeadDto) {
     await this.findOne(id, workspaceId);
 
-    return this.prisma.lead.update({
-      where: { id },
-      data: {
-        firstName: updateLeadDto.firstName,
-        lastName: updateLeadDto.lastName,
-        email: updateLeadDto.email,
-        phone: updateLeadDto.phone,
-        companyName: updateLeadDto.companyName,
-        sourceChannel: updateLeadDto.sourceChannel,
-        metadata: updateLeadDto.metadata,
-        tags: updateLeadDto.tags,
-      },
-    });
+    // Filter undefined keys and validate using Zod metadata override silently via insert schema partial
+    const updatePayload = {
+      firstName: updateLeadDto.firstName,
+      lastName: updateLeadDto.lastName,
+      email: updateLeadDto.email,
+      phone: updateLeadDto.phone,
+      companyName: updateLeadDto.companyName,
+      sourceChannel: updateLeadDto.sourceChannel,
+      metadata: updateLeadDto.metadata,
+      tags: updateLeadDto.tags,
+    };
+
+    const [updatedLead] = await this.dbService.db
+      .update(leads)
+      .set(updatePayload)
+      .where(eq(leads.id, id))
+      .returning();
+
+    return updatedLead;
   }
 
   async remove(id: string, workspaceId: string) {
     await this.findOne(id, workspaceId);
 
-    return this.prisma.lead.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    const [deletedLead] = await this.dbService.db
+      .update(leads)
+      .set({ deletedAt: new Date() })
+      .where(eq(leads.id, id))
+      .returning();
+
+    return deletedLead;
   }
 
   async getCount(workspaceId: string): Promise<number> {
-    return this.prisma.lead.count({ where: { workspaceId, deletedAt: null } });
+    const result = await this.dbService.db
+      .select({ count: leads.id })
+      .from(leads)
+      .where(
+        and(eq(leads.workspaceId, workspaceId), isNull(leads.deletedAt))
+      );
+    return result.length;
   }
 
   async getStatistics(workspaceId: string) {
-    const total = await this.prisma.lead.count({ where: { workspaceId, deletedAt: null } });
-
+    const total = await this.getCount(workspaceId);
     return { total };
   }
 }
+

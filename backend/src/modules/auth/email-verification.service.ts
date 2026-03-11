@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { v4 as uuidv4 } from 'uuid';
+import { users } from '../../db/schema';
+import { eq } from 'drizzle-orm';
 
 interface VerificationRecord {
   userId: string;
@@ -14,7 +16,7 @@ export class EmailVerificationService implements OnModuleInit {
   private readonly logger = new Logger(EmailVerificationService.name);
   private verificationTokens: Map<string, VerificationRecord> = new Map();
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private dbService: DatabaseService) {}
 
   onModuleInit() {
     // Clean expired verification tokens every hour
@@ -24,9 +26,8 @@ export class EmailVerificationService implements OnModuleInit {
   }
 
   async sendVerificationEmail(userId: string): Promise<string> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true, firstName: true },
+    const user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.id, userId),
     });
 
     if (!user) {

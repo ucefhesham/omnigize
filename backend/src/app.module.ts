@@ -3,10 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
+import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { WorkspacesModule } from './modules/workspaces/workspaces.module';
 import { UsersModule } from './modules/users/users.module';
@@ -15,7 +16,7 @@ import { ContactsModule } from './modules/contacts/contacts.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { DealsModule } from './modules/deals/deals.module';
 import { AllExceptionsFilter } from './common/filters';
-import { LoggingInterceptor } from './common/interceptors';
+import { LoggingInterceptor, WorkspaceInterceptor } from './common/interceptors';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
@@ -63,7 +64,11 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
         };
       },
     }),
-    PrismaModule,
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
+    }),
+    DatabaseModule,
     AuthModule,
     WorkspacesModule,
     UsersModule,
@@ -78,6 +83,10 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: WorkspaceInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,

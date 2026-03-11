@@ -7,7 +7,8 @@ import {
   IsNumber,
   Min,
 } from 'class-validator';
-import { ChannelType } from '@prisma/client';
+import type { ChannelType } from '../../../db/schema/enums';
+import { channelTypeEnum } from '../../../db/schema/enums';
 
 export class CreateContactDto {
   @IsString()
@@ -30,7 +31,7 @@ export class CreateContactDto {
   @IsOptional()
   companyName?: string;
 
-  @IsEnum(ChannelType)
+  @IsEnum(channelTypeEnum.enumValues)
   @IsOptional()
   sourceChannel?: ChannelType;
 
@@ -63,7 +64,7 @@ export class UpdateContactDto {
   @IsOptional()
   companyName?: string;
 
-  @IsEnum(ChannelType)
+  @IsEnum(channelTypeEnum.enumValues)
   @IsOptional()
   sourceChannel?: ChannelType;
 

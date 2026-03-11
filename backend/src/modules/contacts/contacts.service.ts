@@ -1,89 +1,86 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CreateContactDto,
-  UpdateContactDto,
-  ContactFilterDto,
-} from './dto/contact.dto';
+import { DatabaseService } from '../../database/database.service';
+import { CreateContactDto, UpdateContactDto, ContactFilterDto } from './dto/contact.dto';
+import { insertContactSchema } from '../../db/zod';
+import { contacts } from '../../db/schema';
+import { eq, and, isNull, ilike, or, desc, sql, SQL } from 'drizzle-orm';
 
 @Injectable()
 export class ContactsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private dbService: DatabaseService) {}
 
-  async create(
-    workspaceId: string,
-    createContactDto: CreateContactDto,
-    userId: string,
-  ) {
-    return this.prisma.contact.create({
-      data: {
-        workspaceId,
-        ownerId: userId,
-        firstName: createContactDto.firstName,
-        lastName: createContactDto.lastName,
-        email: createContactDto.email,
-        phone: createContactDto.phone,
-        companyName: createContactDto.companyName,
-        sourceChannel: createContactDto.sourceChannel,
-        metadata: createContactDto.metadata || {},
-        tags: createContactDto.tags || [],
-      },
+  async create(workspaceId: string, createContactDto: CreateContactDto, userId: string) {
+    const newContactData = insertContactSchema.parse({
+      workspaceId,
+      ownerId: userId,
+      firstName: createContactDto.firstName,
+      lastName: createContactDto.lastName,
+      email: createContactDto.email,
+      phone: createContactDto.phone,
+      companyName: createContactDto.companyName,
+      sourceChannel: createContactDto.sourceChannel,
+      metadata: createContactDto.metadata || {},
+      tags: createContactDto.tags || [],
     });
+
+    const [contact] = await this.dbService.db
+      .insert(contacts)
+      .values(newContactData)
+      .returning();
+
+    return contact;
   }
 
   async findAll(workspaceId: string, filter?: ContactFilterDto) {
-    const where: any = { workspaceId, deletedAt: null };
+    const conditions: (SQL | undefined)[] = [
+      eq(contacts.workspaceId, workspaceId),
+      isNull(contacts.deletedAt),
+    ];
 
     if (filter?.search) {
-      where.OR = [
-        { firstName: { contains: filter.search, mode: 'insensitive' } },
-        { lastName: { contains: filter.search, mode: 'insensitive' } },
-        { email: { contains: filter.search, mode: 'insensitive' } },
-        { companyName: { contains: filter.search, mode: 'insensitive' } },
-      ];
+      conditions.push(
+        or(
+          ilike(contacts.firstName, `%${filter.search}%`),
+          ilike(contacts.lastName, `%${filter.search}%`),
+          ilike(contacts.email, `%${filter.search}%`),
+          ilike(contacts.companyName, `%${filter.search}%`)
+        )
+      );
     }
 
     if (filter?.ownerId) {
-      where.ownerId = filter.ownerId;
+      conditions.push(eq(contacts.ownerId, filter.ownerId));
     }
 
     if (filter?.tags && filter.tags.length > 0) {
-      where.tags = { hasSome: filter.tags };
+      // JSONB array intersection query in Postgres using the ?| operator
+      const tagsArrayStr = filter.tags.map(t => `'${t}'`).join(',');
+      conditions.push(sql`${contacts.tags} ?| array[${sql.raw(tagsArrayStr)}]`);
     }
 
-    return this.prisma.contact.findMany({
-      where,
-      include: {
+    return this.dbService.db.query.contacts.findMany({
+      where: and(...conditions),
+      with: {
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-          },
+          columns: { id: true, firstName: true, lastName: true, avatar: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
-      take: filter?.limit || 50,
-      skip: filter?.offset || 0,
+      orderBy: [desc(contacts.createdAt)],
+      limit: filter?.limit || 50,
+      offset: filter?.offset || 0,
     });
   }
 
   async findOne(id: string, workspaceId: string) {
-    const contact = await this.prisma.contact.findFirst({
-      where: { id, workspaceId, deletedAt: null },
-      include: {
+    const contact = await this.dbService.db.query.contacts.findFirst({
+      where: and(
+        eq(contacts.id, id),
+        eq(contacts.workspaceId, workspaceId),
+        isNull(contacts.deletedAt)
+      ),
+      with: {
         owner: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true,
-          },
-        },
-        conversations: {
-          orderBy: { createdAt: 'desc' },
-          take: 5,
+          columns: { id: true, firstName: true, lastName: true, avatar: true },
         },
       },
     });
@@ -95,38 +92,46 @@ export class ContactsService {
     return contact;
   }
 
-  async update(
-    id: string,
-    workspaceId: string,
-    updateContactDto: UpdateContactDto,
-  ) {
+  async update(id: string, workspaceId: string, updateContactDto: UpdateContactDto) {
     await this.findOne(id, workspaceId);
 
-    return this.prisma.contact.update({
-      where: { id },
-      data: {
-        firstName: updateContactDto.firstName,
-        lastName: updateContactDto.lastName,
-        email: updateContactDto.email,
-        phone: updateContactDto.phone,
-        companyName: updateContactDto.companyName,
-        sourceChannel: updateContactDto.sourceChannel,
-        metadata: updateContactDto.metadata,
-        tags: updateContactDto.tags,
-      },
-    });
+    const updatePayload = {
+      firstName: updateContactDto.firstName,
+      lastName: updateContactDto.lastName,
+      email: updateContactDto.email,
+      phone: updateContactDto.phone,
+      companyName: updateContactDto.companyName,
+      sourceChannel: updateContactDto.sourceChannel,
+      metadata: updateContactDto.metadata,
+      tags: updateContactDto.tags,
+    };
+
+    const [updatedContact] = await this.dbService.db
+      .update(contacts)
+      .set(updatePayload)
+      .where(eq(contacts.id, id))
+      .returning();
+
+    return updatedContact;
   }
 
   async remove(id: string, workspaceId: string) {
     await this.findOne(id, workspaceId);
 
-    return this.prisma.contact.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    const [deletedContact] = await this.dbService.db
+      .update(contacts)
+      .set({ deletedAt: new Date() })
+      .where(eq(contacts.id, id))
+      .returning();
+
+    return deletedContact;
   }
 
   async getCount(workspaceId: string): Promise<number> {
-    return this.prisma.contact.count({ where: { workspaceId, deletedAt: null } });
+    const result = await this.dbService.db
+      .select({ count: contacts.id })
+      .from(contacts)
+      .where(and(eq(contacts.workspaceId, workspaceId), isNull(contacts.deletedAt)));
+    return result.length;
   }
 }

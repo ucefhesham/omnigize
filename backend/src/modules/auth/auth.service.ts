@@ -1,15 +1,13 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DatabaseService } from '../../database/database.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 import { TokenBlacklistService } from './token-blacklist.service';
 import { EmailVerificationService } from './email-verification.service';
+import { users, workspaces, roles, userRoles } from '../../db/schema';
+import { eq, and, isNull } from 'drizzle-orm';
 
 interface UserWithRelations {
   id: string;
@@ -27,7 +25,7 @@ interface UserWithRelations {
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    private dbService: DatabaseService,
     private jwtService: JwtService,
     private configService: ConfigService,
     private tokenBlacklistService: TokenBlacklistService,
@@ -42,19 +40,14 @@ export class AuthService {
     return secret;
   }
 
-  async validateUser(
-    email: string,
-    password: string,
-  ): Promise<UserWithRelations | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: {
+  async validateUser(email: string, password: string): Promise<UserWithRelations | null> {
+    const user = await this.dbService.db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: {
         department: true,
         team: true,
         userRoles: {
-          include: {
-            role: true,
-          },
+          with: { role: true },
         },
         workspace: true,
       },
@@ -116,8 +109,8 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: registerDto.email },
+    const existingUser = await this.dbService.db.query.users.findFirst({
+      where: eq(users.email, registerDto.email),
     });
 
     if (existingUser) {
@@ -126,77 +119,81 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    let workspace;
-    let workspaceId: string;
+    return this.dbService.globalDb.transaction(async (tx) => {
+      let workspaceId: string;
 
-    if (registerDto.workspaceId) {
-      workspaceId = registerDto.workspaceId;
-    } else {
-      workspace = await this.prisma.workspace.create({
-        data: {
-          name:
-            registerDto.workspaceName || `${registerDto.firstName}'s Workspace`,
-          slug:
-            registerDto.workspaceName?.toLowerCase().replace(/\s+/g, '-') ||
-            `${registerDto.firstName.toLowerCase()}-workspace`,
+      if (!registerDto.workspaceId) {
+        const slugStr = registerDto.workspaceName?.toLowerCase().replace(/\s+/g, '-') || `${registerDto.firstName.toLowerCase()}-workspace`;
+        
+        const [workspace] = await tx.insert(workspaces).values({
+          name: registerDto.workspaceName || `${registerDto.firstName}'s Workspace`,
+          slug: slugStr,
           settings: {},
-        },
-      });
-      workspaceId = workspace.id;
-    }
+        }).returning();
+        
+        workspaceId = workspace.id;
 
-    const user = await this.prisma.user.create({
-      data: {
+        // Give the owner an Admin role by default for the new workspace
+        await tx.insert(roles).values({
+          workspaceId: workspaceId,
+          name: 'Admin',
+          description: 'Workspace Administrator',
+          isSystemRole: true,
+        });
+      } else {
+        workspaceId = registerDto.workspaceId;
+      }
+
+      const [user] = await tx.insert(users).values({
         email: registerDto.email,
         passwordHash: hashedPassword,
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
         workspaceId,
-      },
-      include: {
-        workspace: true,
-      },
-    });
+      }).returning();
 
-    const defaultRole = await this.prisma.role.findFirst({
-      where: {
-        workspaceId,
-        name: 'Admin',
-      },
-    });
+      const defaultRole = await tx.query.roles.findFirst({
+        where: and(
+          eq(roles.workspaceId, workspaceId),
+          eq(roles.name, 'Admin')
+        ),
+      });
 
-    if (defaultRole) {
-      await this.prisma.userRole.create({
-        data: {
+      if (defaultRole) {
+        await tx.insert(userRoles).values({
           userId: user.id,
           roleId: defaultRole.id,
-        },
+        });
+      }
+
+      const userWorkspace = await tx.query.workspaces.findFirst({
+        where: eq(workspaces.id, workspaceId)
       });
-    }
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      workspaceId: user.workspaceId,
-    };
-
-    // Send verification email
-    await this.emailVerificationService.sendVerificationEmail(user.id);
-
-    return {
-      access_token: this.jwtService.sign(payload),
-      refresh_token: this.jwtService.sign(payload, {
-        expiresIn: '30d',
-        secret: this.getRefreshSecret(),
-      }),
-      user: {
-        id: user.id,
+      const payload = {
+        sub: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        workspace: user.workspace,
-      },
-    };
+        workspaceId: user.workspaceId,
+      };
+
+      // Send verification email ideally async but keeping legacy pattern identical
+      await this.emailVerificationService.sendVerificationEmail(user.id);
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        refresh_token: this.jwtService.sign(payload, {
+          expiresIn: '30d',
+          secret: this.getRefreshSecret(),
+        }),
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          workspace: userWorkspace,
+        },
+      };
+    });
   }
 
   async refreshToken(token: string) {
@@ -205,19 +202,17 @@ export class AuthService {
         secret: this.getRefreshSecret(),
       });
 
-      const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub },
-        include: {
+      const user = await this.dbService.db.query.users.findFirst({
+        where: and(eq(users.id, payload.sub), isNull(users.deletedAt)),
+        with: {
           workspace: true,
           userRoles: {
-            include: {
-              role: true,
-            },
+            with: { role: true },
           },
         },
       });
 
-      if (!user || user.deletedAt) {
+      if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 

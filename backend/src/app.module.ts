@@ -7,6 +7,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { WorkspacesModule } from './modules/workspaces/workspaces.module';
+import { UsersModule } from './modules/users/users.module';
 import { AllExceptionsFilter } from './common/filters';
 import { LoggingInterceptor } from './common/interceptors';
 import {
@@ -38,6 +40,8 @@ import {
     }),
     PrismaModule,
     AuthModule,
+    WorkspacesModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [

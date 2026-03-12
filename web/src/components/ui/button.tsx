@@ -15,10 +15,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     // Variants
     const variants = {
-      primary: "bg-slate-900 text-white hover:bg-slate-800 focus-visible:ring-slate-900 shadow-sm hover:shadow-md",
-      secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:ring-slate-200",
-      outline: "border border-slate-200 bg-transparent hover:bg-slate-50 text-slate-900 focus-visible:ring-slate-200",
-      ghost: "hover:bg-slate-100 text-slate-700 hover:text-slate-900 focus-visible:ring-slate-200",
+      primary: "bg-primary text-slate-900 hover:bg-primary-hover focus-visible:ring-primary shadow-sm hover:shadow-md",
+      secondary: "bg-surface text-foreground-main hover:bg-background-main focus-visible:ring-border-main",
+      outline: "border border-border-main bg-transparent hover:bg-background-main text-foreground-main focus-visible:ring-border-main",
+      ghost: "hover:bg-background-main text-foreground-main/80 hover:text-foreground-main focus-visible:ring-border-main",
     };
 
     // Sizes

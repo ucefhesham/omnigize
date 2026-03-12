@@ -24,9 +24,9 @@ export function LanguageSwitcher({ currentLang, dictionary }: LanguageSwitcherPr
   return (
     <Link
       href={redirectedPathName(nextLang)}
-      className="flex items-center gap-2 rounded-lg border border-border-light bg-background-light px-3 py-1.5 text-sm font-medium text-text-main transition-colors hover:bg-slate-50 hover:border-slate-300"
+      className="flex items-center gap-2 rounded-lg border border-border-main bg-surface px-3 py-1.5 text-sm font-medium text-foreground-main transition-colors hover:bg-background-main"
     >
-      <span className="material-symbols-outlined text-[16px] text-primary-dark">language</span>
+      <span className="material-symbols-outlined text-[16px] text-primary">language</span>
       {dictionary.language[nextLang]}
     </Link>
   );

@@ -1,30 +1,48 @@
+"use client";
+import React, { useState } from "react";
 import { getDictionary } from "@/get-dictionary";
 import { Locale } from "@/i18n-config";
 import { AuthLayout } from "@/components/layouts/auth-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Metadata } from "next";
+import { useRouter } from "next/navigation";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ lang: string }>;
-}): Promise<Metadata> {
-  const { lang } = (await params) as { lang: Locale };
-  const d = await getDictionary(lang);
-  return {
-    title: `${d.auth.loginTitle} | ${d.common.brand}`,
-  };
-}
+// Metadata removed because this is now a client component
+// In Next.js App Router, you'd typically have a server component wrapper for metadata or just use it in the page if it was a server component.
+// For simplicity in this demo, I'll convert it to a client-side layout.
 
-export default async function LoginPage({
+export default function LoginPage({
   params,
 }: {
   params: Promise<{ lang: string }>;
 }) {
-  const { lang } = (await params) as { lang: Locale };
-  const d = await getDictionary(lang);
+  const resolvedParams = React.use(params);
+  const lang = resolvedParams.lang as Locale;
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [dictionary, setDictionary] = useState<any>(null);
+
+  React.useEffect(() => {
+    getDictionary(lang).then(setDictionary);
+  }, [lang]);
+
+  if (!dictionary) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  const d = dictionary;
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      router.push(`/${lang}/dashboard`);
+    }, 1200);
+  };
 
   return (
     <AuthLayout lang={lang} dictionary={d}>
@@ -38,7 +56,7 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <form className="flex flex-col gap-5 mt-4" action="#">
+        <form className="flex flex-col gap-5 mt-4" onSubmit={handleLogin}>
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-slate-700 select-none">
               {d.auth.emailLabel}
@@ -47,6 +65,7 @@ export default async function LoginPage({
               type="email" 
               placeholder={d.auth.emailPlaceholder} 
               icon="mail" 
+              defaultValue="ucefhesham@gmail.com"
               required 
             />
           </div>
@@ -67,6 +86,7 @@ export default async function LoginPage({
               type="password" 
               placeholder={d.auth.passwordPlaceholder} 
               icon="lock" 
+              defaultValue="Omnigize2026!"
               required 
             />
           </div>
@@ -82,11 +102,13 @@ export default async function LoginPage({
             </label>
           </div>
 
-          <Button type="submit" size="lg" className="w-full mt-2">
-            {d.auth.signInButton}
-            <span className="material-symbols-outlined rtl:rotate-180 text-[18px] ms-2">
-              arrow_forward
-            </span>
+          <Button type="submit" size="lg" className="w-full mt-2" disabled={loading}>
+            {loading ? d.auth.signingIn : d.auth.signInButton}
+            {!loading && (
+              <span className="material-symbols-outlined rtl:rotate-180 text-[18px] ms-2">
+                arrow_forward
+              </span>
+            )}
           </Button>
         </form>
 

@@ -7,9 +7,10 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
   lang: Locale;
   dictionary: any;
+  activeHref?: string;
 }
 
-export function DashboardLayout({ children, lang, dictionary }: DashboardLayoutProps) {
+export function DashboardLayout({ children, lang, dictionary, activeHref }: DashboardLayoutProps) {
   const isRtl = lang === "ar";
 
   const menuItems = [
@@ -51,7 +52,7 @@ export function DashboardLayout({ children, lang, dictionary }: DashboardLayoutP
               </h5>
               <div className="space-y-1">
                 {group.items.map((item) => {
-                  const isActive = item.href.includes('dashboard');
+                  const isActive = activeHref ? item.href === activeHref : (item.href.includes('dashboard') && !activeHref);
                   return (
                     <Link
                       key={item.href}
@@ -66,9 +67,6 @@ export function DashboardLayout({ children, lang, dictionary }: DashboardLayoutP
                         {item.icon}
                       </span>
                       <span className="text-sm font-semibold">{item.label}</span>
-                      {item.label === "Leads" && !isActive && (
-                        <span className="ms-auto text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full font-black">Soon</span>
-                      )}
                     </Link>
                   );
                 })}

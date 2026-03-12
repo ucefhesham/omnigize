@@ -41,13 +41,13 @@ export class ContactResponse {
   @Field({ nullable: true })
   sourceChannel?: string;
 
-  @Field()
-  metadata: any;
+  @Field(() => String, { nullable: true })
+  metadata?: any;
 
-  @Field()
+  @Field(() => [String])
   tags: string[];
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   owner?: any;
 
   @Field()

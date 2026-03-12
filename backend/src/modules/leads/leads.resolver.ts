@@ -37,17 +37,17 @@ export class LeadResponse {
   @Field({ nullable: true })
   sourceChannel?: string;
 
-  @Field()
-  metadata: any;
+  @Field(() => String, { nullable: true })
+  metadata?: any;
 
-  @Field()
+  @Field(() => [String])
   tags: string[];
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   owner?: any;
 
-  @Field(() => [DealResponse])
-  deals: DealResponse[];
+  @Field(() => [LeadDealResponse])
+  deals: LeadDealResponse[];
 
   @Field()
   createdAt: Date;
@@ -57,15 +57,15 @@ export class LeadResponse {
 }
 
 @ObjectType()
-export class DealResponse {
+export class LeadDealResponse {
   @Field(() => ID)
   id: string;
 
   @Field()
   title: string;
 
-  @Field()
-  value: any;
+  @Field(() => String, { nullable: true })
+  value?: any;
 
   @Field({ nullable: true })
   expectedCloseDate?: Date;

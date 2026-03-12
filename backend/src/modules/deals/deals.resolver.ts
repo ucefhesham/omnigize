@@ -23,8 +23,8 @@ export class DealResponse {
   @Field()
   title: string;
 
-  @Field()
-  value: any;
+  @Field(() => String, { nullable: true })
+  value?: any;
 
   @Field({ nullable: true })
   currency?: string;
@@ -38,16 +38,16 @@ export class DealResponse {
   @Field({ nullable: true })
   actualCloseDate?: Date;
 
-  @Field()
-  metadata: any;
+  @Field(() => String, { nullable: true })
+  metadata?: any;
 
-  @Field()
+  @Field(() => [String])
   tags: string[];
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   owner?: any;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   lead?: any;
 
   @Field()

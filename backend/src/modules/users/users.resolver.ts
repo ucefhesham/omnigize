@@ -37,10 +37,10 @@ export class UserResponse {
   @Field()
   isWorkspaceOwner: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   department?: any;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   team?: any;
 
   @Field(() => [String])

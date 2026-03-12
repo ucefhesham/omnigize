@@ -33,6 +33,6 @@ import { EmailVerificationService } from './email-verification.service';
   ],
   providers: [AuthService, AuthResolver, JwtStrategy, LocalStrategy, TokenBlacklistService, EmailVerificationService],
   controllers: [AuthController],
-  exports: [AuthService, TokenBlacklistService, EmailVerificationService],
+  exports: [AuthService, TokenBlacklistService, EmailVerificationService, JwtModule],
 })
 export class AuthModule {}

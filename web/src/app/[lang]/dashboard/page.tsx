@@ -23,7 +23,7 @@ export default async function DashboardPage({
   const greeting = d.dashboard.greeting.replace('{name}', 'Ucef');
 
   return (
-    <DashboardLayout lang={lang} dictionary={d}>
+    <DashboardLayout lang={lang} dictionary={d} activeHref={`/${lang}/dashboard`}>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-black text-foreground-main tracking-tight">{d.dashboard.navHome}</h2>

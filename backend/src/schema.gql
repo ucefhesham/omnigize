@@ -1,0 +1,315 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AssignRoleDto {
+  roleId: String!
+}
+
+type AuthPayload {
+  access_token: String!
+  refresh_token: String!
+  user: AuthUserResponse!
+}
+
+type AuthUserResponse {
+  avatar: String
+  email: String!
+  firstName: String
+  id: String!
+  lastName: String
+  roles: [String!]!
+  workspace: AuthWorkspaceResponse
+}
+
+type AuthWorkspaceResponse {
+  id: String!
+  name: String!
+  slug: String!
+}
+
+input ContactFilterDto {
+  limit: Int
+  offset: Int
+  ownerId: String
+  search: String
+  tags: [String!]
+}
+
+type ContactResponse {
+  companyName: String
+  createdAt: DateTime!
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
+  metadata: String
+  owner: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]!
+  updatedAt: DateTime!
+}
+
+input CreateContactDto {
+  companyName: String
+  email: String
+  firstName: String
+  lastName: String
+  metadata: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]
+}
+
+input CreateDealDto {
+  currency: String
+  expectedCloseDate: String
+  leadId: String
+  metadata: String
+  name: String!
+  probability: Float
+  tags: [String!]
+  value: Float
+}
+
+input CreateLeadDto {
+  companyName: String
+  contactId: String
+  email: String
+  firstName: String
+  lastName: String
+  metadata: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]
+}
+
+input CreateWorkspaceDto {
+  domain: String
+  industry: String
+  logo: String
+  name: String!
+  settings: String
+  slug: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+input DealFilterDto {
+  leadId: String
+  limit: Int
+  offset: Int
+  ownerId: String
+  search: String
+}
+
+type DealResponse {
+  actualCloseDate: DateTime
+  createdAt: DateTime!
+  currency: String
+  expectedCloseDate: DateTime
+  id: ID!
+  lead: String
+  metadata: String
+  owner: String
+  probability: Float!
+  tags: [String!]!
+  title: String!
+  updatedAt: DateTime!
+  value: String
+}
+
+type DealStatistics {
+  total: Int!
+  totalValue: Float!
+}
+
+type LeadDealResponse {
+  expectedCloseDate: DateTime
+  id: ID!
+  title: String!
+  value: String
+}
+
+input LeadFilterDto {
+  limit: Int
+  offset: Int
+  ownerId: String
+  search: String
+  tags: [String!]
+}
+
+type LeadResponse {
+  companyName: String
+  createdAt: DateTime!
+  deals: [LeadDealResponse!]!
+  email: String
+  firstName: String
+  id: ID!
+  lastName: String
+  metadata: String
+  owner: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]!
+  updatedAt: DateTime!
+}
+
+type LeadStatistics {
+  total: Int!
+}
+
+type Mutation {
+  assignRole(assignRoleDto: AssignRoleDto!, id: ID!): UserResponse!
+  createContact(createContactDto: CreateContactDto!): ContactResponse!
+  createDeal(createDealDto: CreateDealDto!): DealResponse!
+  createLead(createLeadDto: CreateLeadDto!): LeadResponse!
+  createWorkspace(createWorkspaceDto: CreateWorkspaceDto!): WorkspaceResponse!
+  deleteContact(id: ID!): Boolean!
+  deleteDeal(id: ID!): Boolean!
+  deleteLead(id: ID!): Boolean!
+  deleteUser(id: ID!): Boolean!
+  deleteWorkspace(id: ID!): Boolean!
+  login(email: String!, password: String!): AuthPayload!
+  logout: Boolean!
+  refreshToken(token: String!): RefreshTokenPayload!
+  register(email: String!, firstName: String!, lastName: String!, password: String!, workspaceId: String, workspaceName: String): AuthPayload!
+  removeRole(id: ID!, roleId: ID!): UserResponse!
+  updateContact(id: ID!, updateContactDto: UpdateContactDto!): ContactResponse!
+  updateDeal(id: ID!, updateDealDto: UpdateDealDto!): DealResponse!
+  updateLead(id: ID!, updateLeadDto: UpdateLeadDto!): LeadResponse!
+  updateMyProfile(updateUserDto: UpdateUserDto!): UserResponse!
+  updateUser(id: ID!, updateUserDto: UpdateUserDto!): UserResponse!
+  updateWorkspace(id: ID!, updateWorkspaceDto: UpdateWorkspaceDto!): WorkspaceResponse!
+  verifyEmail(token: String!): Boolean!
+}
+
+type Query {
+  contact(id: ID!): ContactResponse!
+  contacts(filter: ContactFilterDto): [ContactResponse!]!
+  deal(id: ID!): DealResponse!
+  dealStatistics: DealStatistics!
+  deals(filter: DealFilterDto): [DealResponse!]!
+  lead(id: ID!): LeadResponse!
+  leadStatistics: LeadStatistics!
+  leads(filter: LeadFilterDto): [LeadResponse!]!
+  myProfile: UserResponse!
+  myWorkspaces: [WorkspaceResponse!]!
+  user(id: ID!): UserResponse!
+  users(limit: Int = 50, page: Int = 1): [UserResponse!]!
+  workspace(id: ID!): WorkspaceWithStats!
+}
+
+type RefreshTokenPayload {
+  access_token: String!
+  refresh_token: String!
+}
+
+input UpdateContactDto {
+  companyName: String
+  email: String
+  firstName: String
+  lastName: String
+  metadata: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]
+}
+
+input UpdateDealDto {
+  actualCloseDate: String
+  currency: String
+  expectedCloseDate: String
+  metadata: String
+  name: String
+  probability: Float
+  tags: [String!]
+  value: Float
+}
+
+input UpdateLeadDto {
+  companyName: String
+  email: String
+  firstName: String
+  lastName: String
+  metadata: String
+  phone: String
+  sourceChannel: String
+  tags: [String!]
+}
+
+input UpdateUserDto {
+  avatar: String
+  departmentId: String
+  firstName: String
+  lastName: String
+  status: String
+  teamId: String
+}
+
+input UpdateWorkspaceDto {
+  domain: String
+  industry: String
+  isActive: Boolean
+  logo: String
+  name: String
+  settings: String
+  slug: String
+  subscriptionTier: String
+}
+
+type UserResponse {
+  avatar: String
+  createdAt: DateTime!
+  department: String
+  email: String!
+  firstName: String
+  id: ID!
+  isWorkspaceOwner: Boolean!
+  lastLoginAt: DateTime
+  lastName: String
+  roles: [String!]!
+  status: String!
+  team: String
+}
+
+type WorkspaceResponse {
+  createdAt: DateTime!
+  domain: String
+  id: ID!
+  industry: String!
+  isActive: Boolean!
+  logo: String
+  name: String!
+  settings: String
+  slug: String!
+  subscriptionTier: String!
+  updatedAt: DateTime!
+}
+
+type WorkspaceStatistics {
+  contacts: Int!
+  deals: Int!
+  leads: Int!
+  properties: Int!
+  users: Int!
+}
+
+type WorkspaceWithStats {
+  createdAt: DateTime!
+  domain: String
+  id: ID!
+  industry: String!
+  isActive: Boolean!
+  logo: String
+  name: String!
+  settings: String
+  slug: String!
+  statistics: WorkspaceStatistics!
+  subscriptionTier: String!
+  updatedAt: DateTime!
+}

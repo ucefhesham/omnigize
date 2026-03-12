@@ -7,19 +7,19 @@ import { Public } from '../../common/decorators';
 import { AuthGuard } from '../../common/guards';
 
 @ObjectType()
-export class AuthPayload {
+export class AuthWorkspaceResponse {
   @Field()
-  access_token: string;
+  id: string;
 
   @Field()
-  refresh_token: string;
+  name: string;
 
-  @Field(() => UserResponse)
-  user: UserResponse;
+  @Field()
+  slug: string;
 }
 
 @ObjectType()
-export class UserResponse {
+export class AuthUserResponse {
   @Field()
   id: string;
 
@@ -38,20 +38,20 @@ export class UserResponse {
   @Field(() => [String])
   roles: string[];
 
-  @Field(() => WorkspaceResponse, { nullable: true })
-  workspace?: WorkspaceResponse;
+  @Field(() => AuthWorkspaceResponse, { nullable: true })
+  workspace?: AuthWorkspaceResponse;
 }
 
 @ObjectType()
-export class WorkspaceResponse {
+export class AuthPayload {
   @Field()
-  id: string;
+  access_token: string;
 
   @Field()
-  name: string;
+  refresh_token: string;
 
-  @Field()
-  slug: string;
+  @Field(() => AuthUserResponse)
+  user: AuthUserResponse;
 }
 
 @ObjectType()

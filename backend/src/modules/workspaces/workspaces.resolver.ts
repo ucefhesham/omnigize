@@ -6,12 +6,31 @@ import {
   ObjectType,
   Field,
   ID,
+  Int,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto } from './dto/workspace.dto';
 import { CurrentUser, Roles } from '../../common/decorators';
 import { AuthGuard, RolesGuard } from '../../common/guards';
+
+@ObjectType()
+export class WorkspaceStatistics {
+  @Field(() => Int)
+  contacts: number;
+
+  @Field(() => Int)
+  leads: number;
+
+  @Field(() => Int)
+  deals: number;
+
+  @Field(() => Int)
+  properties: number;
+
+  @Field(() => Int)
+  users: number;
+}
 
 @ObjectType()
 export class WorkspaceResponse {
@@ -39,8 +58,8 @@ export class WorkspaceResponse {
   @Field()
   isActive: boolean;
 
-  @Field()
-  settings: any;
+  @Field(() => String, { nullable: true })
+  settings?: any;
 
   @Field()
   createdAt: Date;
@@ -51,14 +70,8 @@ export class WorkspaceResponse {
 
 @ObjectType()
 export class WorkspaceWithStats extends WorkspaceResponse {
-  @Field()
-  statistics: {
-    contacts: number;
-    leads: number;
-    deals: number;
-    properties: number;
-    users: number;
-  };
+  @Field(() => WorkspaceStatistics)
+  statistics: WorkspaceStatistics;
 }
 
 @Resolver(() => WorkspaceResponse)
